@@ -32,7 +32,9 @@ app.get("/notes", (req, res) => {
 app.get("/api/notes", (req, res) => {
     fs.readFile(__dirname + "/db/db.json", (err, data) =>{
         if(err){
-            throw err;
+            console.log(err);
+            res.sendStatus(500);
+            return;
         }
         res.json(JSON.parse(data));
 
@@ -42,20 +44,24 @@ app.get("/api/notes", (req, res) => {
 //write the newly created note to the db and send it back to the client
 app.post("/api/notes", (req, res) => {
     var newNote = req.body;
-    //newNote.id = newNote.title.replace(/\s+/g, "").toLowerCase();
+    //giving each note a unique id to be able to identify during delete operation
     let prefix = newNote.title.replace(/\s+/g, "").toLowerCase();
     newNote.id = uniqid(prefix);
     
     fs.readFile(__dirname + "/db/db.json", (err, data) => {
         if(err){
-            throw err;
+            console.log(err);
+            res.sendStatus(500);
+            return;
         }
         let json = JSON.parse(data);
         json.push(newNote);
 
         fs.writeFile(__dirname + "/db/db.json", JSON.stringify(json), (err) => {
             if(err){
-                throw err;
+                console.log(err);
+                res.sendStatus(500);
+                return;
             }
             res.json(newNote);
         })
@@ -70,19 +76,31 @@ app.delete("/api/notes/:id", (req, res) => {
 
     fs.readFile(__dirname + "/db/db.json", (err, data) => {
         if(err){
-            throw err;
+            console.log(err);
+            res.sendStatus(500);
+            return;
         }
-        let json = JSON.parse(data);
+        try{
+            var json = JSON.parse(data);
+        }
+        catch(err){
+            console.log(err);
+            res.sendStatus(500);
+            return;
+        }
         
         for(let i=0; i<json.length; i++){
             if(json[i].id === chosenNoteToDelete){
                 json.splice(i,1);
+                break;
             }
         }
 
         fs.writeFile(__dirname + "/db/db.json", JSON.stringify(json), (err) => {
             if(err){
-                throw err;
+                console.log(err);
+                res.sendStatus(500);
+                return;
             }
             res.send("Successfully deleted");
         })
