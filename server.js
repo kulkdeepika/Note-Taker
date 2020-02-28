@@ -17,12 +17,6 @@ app.use(express.json());
 
 app.use('/', express.static('public'));
 
-
-// Loads the home page
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/index.html"));
-})
-
 // Sends the notes.html page
 app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/notes.html"));
@@ -36,8 +30,8 @@ app.get("/api/notes", (req, res) => {
             res.sendStatus(500);
             return;
         }
+        
         res.json(JSON.parse(data));
-
     })
 });
 
@@ -54,7 +48,7 @@ app.post("/api/notes", (req, res) => {
             res.sendStatus(500);
             return;
         }
-        let json = JSON.parse(data);
+        let json = JSON.parse(data);     
         json.push(newNote);
 
         fs.writeFile(__dirname + "/db/db.json", JSON.stringify(json), (err) => {
@@ -107,6 +101,11 @@ app.delete("/api/notes/:id", (req, res) => {
     
     })
 
+});
+
+// Loads the home page
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
 // Starts the server to begin listening
